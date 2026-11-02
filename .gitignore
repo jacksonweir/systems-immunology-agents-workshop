@@ -1,0 +1,20 @@
+# The workshop data (2.2 GB) — downloaded with get_data.sh, not tracked
+minimal/
+
+# The papers and supplements from Canvas — publisher content, never commit these
+papers/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Large or regenerable outputs: keep figures and small tables, not these
+*.h5ad
+*.h5
+*.npz
+*.parquet
+*.gz
