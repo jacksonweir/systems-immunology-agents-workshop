@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive paper</title>
+<style>
+:root{
+  --bg:#f7f7f5; --card:#fff; --ink:#1d1d1f; --muted:#6b6b70; --line:#e3e3e0;
+  --accent:#2f5fb3; --accent-soft:#eef3fb;
+  --ok:#1f7a4d; --ok-bg:#e8f5ee; --partly:#8a6d1f; --partly-bg:#fdf4dc;
+  --no:#a63232; --no-bg:#fbeaea; --cant:#5a5a60; --cant-bg:#eeeeec;
+  --untested:#4a4a52; --untested-bg:#f0f0ee; --warn:#8a4b1f;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16161a; --card:#1e1e24; --ink:#eceCef; --muted:#a0a0aa; --line:#32323a;
+    --accent:#7fa8e8; --accent-soft:#23293a;
+    --ok:#6ed29b; --ok-bg:#1b2f25; --partly:#e0c268; --partly-bg:#302a16;
+    --no:#ef8f8f; --no-bg:#331d1d; --cant:#b0b0ba; --cant-bg:#26262c;
+    --untested:#b8b8c2; --untested-bg:#26262c; --warn:#e3a46c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16161a; --card:#1e1e24; --ink:#ececef; --muted:#a0a0aa; --line:#32323a;
+  --accent:#7fa8e8; --accent-soft:#23293a;
+  --ok:#6ed29b; --ok-bg:#1b2f25; --partly:#e0c268; --partly-bg:#302a16;
+  --no:#ef8f8f; --no-bg:#331d1d; --cant:#b0b0ba; --cant-bg:#26262c;
+  --untested:#b8b8c2; --untested-bg:#26262c; --warn:#e3a46c;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+}
+.wrap{max-width:1040px; margin:0 auto; padding:32px 16px 80px}
+header.top{border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:28px}
+h1{font-size:25px; line-height:1.25; margin:0 0 8px; letter-spacing:-.01em}
+.byline{color:var(--muted); font-size:14px; margin:0 0 10px}
+.meta{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
+.pill{
+  font-size:12px; padding:3px 9px; border-radius:999px;
+  background:var(--accent-soft); color:var(--accent); border:1px solid var(--line);
+  text-decoration:none;
+}
+.pill:hover{text-decoration:underline}
+.summary{
+  background:var(--card); border:1px solid var(--line); border-radius:10px;
+  padding:16px 18px; margin:20px 0 0; font-size:15px;
+}
+h2{font-size:19px; margin:40px 0 6px; letter-spacing:-.01em}
+h2 .count{color:var(--muted); font-weight:400; font-size:14px; margin-left:8px}
+.lede{color:var(--muted); font-size:14px; margin:0 0 16px}
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:10px;
+  padding:16px 18px; margin-bottom:12px;
+}
+.chead{display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap}
+.cid{
+  font:600 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
+  background:var(--accent-soft); color:var(--accent);
+  border-radius:5px; padding:3px 7px; flex:0 0 auto;
+}
+.claim{font-weight:600; flex:1 1 320px; min-width:240px}
+.status{
+  font-size:12px; font-weight:600; padding:3px 9px; border-radius:999px;
+  flex:0 0 auto; white-space:nowrap;
+}
+.s-reproduces{background:var(--ok-bg); color:var(--ok)}
+.s-partly{background:var(--partly-bg); color:var(--partly)}
+.s-does-not{background:var(--no-bg); color:var(--no)}
+.s-cannot{background:var(--cant-bg); color:var(--cant)}
+.s-untested{background:var(--untested-bg); color:var(--untested)}
+dl{margin:14px 0 0; display:grid; grid-template-columns:132px 1fr; gap:7px 14px; font-size:14px}
+dt{color:var(--muted); font-weight:600}
+dd{margin:0}
+dd code,.mono{
+  font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;
+  background:var(--accent-soft); padding:1px 5px; border-radius:4px;
+}
+.fig{color:var(--accent); font-weight:600}
+.measured{border-left:3px solid var(--accent); padding-left:10px}
+.watch{border-left:3px solid var(--warn); padding-left:10px; color:var(--ink)}
+.watch strong{color:var(--warn)}
+table{border-collapse:collapse; width:100%; font-size:13.5px; margin-top:6px}
+th,td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+th{color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.04em}
+tr:last-child td{border-bottom:none}
+.note{color:var(--warn); font-size:13px; margin-top:6px}
+footer{margin-top:52px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+.figs{margin:16px 0 0; display:grid; gap:14px}
+.figs figure{margin:0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--bg)}
+.figs img{display:block; width:100%; height:auto; background:#fcfcfb}
+.figs figcaption{font-size:12.5px; color:var(--muted); padding:8px 11px; border-top:1px solid var(--line)}
+.figs a{text-decoration:none}
+.figs .missing{padding:14px; font-size:13px; color:var(--warn)}
+@media (max-width:620px){ dl{grid-template-columns:1fr; gap:2px 0} dt{margin-top:8px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 id="title">—</h1>
+    <p class="byline" id="authors"></p>
+    <p class="byline" id="journal"></p>
+    <div class="meta" id="meta"></div>
+    <div class="summary" id="summary"></div>
+  </header>
+  <main id="main"></main>
+  <footer id="footer"></footer>
+</div>
+
+<script src="paper_data.js"></script>
+<script>
+(function () {
+  var P = (typeof PAPER !== "undefined") ? PAPER : null;
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined && text !== null) n.textContent = text;
+    return n;
+  }
+  if (!P) {
+    $("title").textContent = "paper_data.js did not load";
+    $("summary").textContent =
+      "Open this page from the folder that contains paper_data.js (open ~/workshop_agents/paper.html).";
+    return;
+  }
+
+  $("title").textContent = P.title || "Interactive paper";
+  $("authors").textContent = P.authors || "";
+  $("journal").textContent = P.journal || "";
+
+  var meta = $("meta");
+  function pill(label, href) {
+    var n = href ? el("a", "pill", label) : el("span", "pill", label);
+    if (href) { n.href = href; n.target = "_blank"; n.rel = "noopener"; }
+    meta.appendChild(n);
+  }
+  if (P.doi) pill("doi:" + P.doi, "https://doi.org/" + P.doi);
+  if (P.pmid) pill("PMID " + P.pmid, "https://pubmed.ncbi.nlm.nih.gov/" + P.pmid + "/");
+  if (P.updated) pill("updated " + P.updated);
+  if (P.built_by) pill(P.built_by);
+  $("summary").textContent = P.summary || "";
+
+  var main = $("main");
+  function section(title, count, lede) {
+    var h = el("h2", null, title);
+    if (count !== null && count !== undefined) {
+      h.appendChild(el("span", "count", count));
+    }
+    main.appendChild(h);
+    if (lede) main.appendChild(el("p", "lede", lede));
+  }
+  function statusClass(s) {
+    s = (s || "").toLowerCase();
+    if (s.indexOf("cannot") === 0) return "s-cannot";
+    if (s.indexOf("reproduces") === 0) return "s-reproduces";
+    if (s.indexOf("partly") === 0) return "s-partly";
+    if (s.indexOf("does not") === 0) return "s-does-not";
+    return "s-untested";
+  }
+  function row(dl, label, value, cls) {
+    if (!value) return;
+    dl.appendChild(el("dt", null, label));
+    var dd = el("dd", cls || null);
+    if (label === "Watch out") {
+      dd.appendChild(el("strong", null, "Watch out: "));
+      dd.appendChild(document.createTextNode(value));
+    } else {
+      dd.textContent = value;
+    }
+    dl.appendChild(dd);
+  }
+
+  // Figures live in results/ beside this page. Each entry is {src, caption}; the
+  // image links to itself so a click opens the full-size PNG.
+  function addFigures(card, figs) {
+    if (!figs || !figs.length) return;
+    var box = el("div", "figs");
+    figs.forEach(function (f) {
+      var fig = el("figure");
+      var a = el("a");
+      a.href = f.src; a.target = "_blank"; a.rel = "noopener";
+      var img = el("img");
+      img.src = f.src;
+      img.alt = f.caption || f.src;
+      img.loading = "lazy";
+      img.onerror = function () {
+        fig.replaceChildren(el("div", "missing",
+          "⚠ " + f.src + " is not in this folder — re-run the script that makes it."));
+      };
+      a.appendChild(img);
+      fig.appendChild(a);
+      if (f.caption) fig.appendChild(el("figcaption", null, f.caption));
+      box.appendChild(fig);
+    });
+    card.appendChild(box);
+  }
+
+  // ---- claims
+  var claims = P.claims || [];
+  var tally = {};
+  claims.forEach(function (c) {
+    var s = c.status || "not tested";
+    tally[s] = (tally[s] || 0) + 1;
+  });
+  var tallyText = Object.keys(tally).map(function (k) { return tally[k] + " " + k; }).join(" · ");
+  section("Claims", "(" + claims.length + ": " + tallyText + ")",
+    "One row per main result. 'Data' names the file in this folder that could test it — " +
+    "minimal/ for the h5ads and tables, papers/…/supplement/ for the per-animal source data. " +
+    "'Measured' was read from the data; everything else was read from the paper.");
+
+  claims.forEach(function (c) {
+    var card = el("div", "card");
+    var head = el("div", "chead");
+    head.appendChild(el("span", "cid", c.id));
+    head.appendChild(el("span", "claim", c.claim));
+    head.appendChild(el("span", "status " + statusClass(c.status), c.status || "not tested"));
+    card.appendChild(head);
+
+    var dl = el("dl");
+    if (c.figure) {
+      dl.appendChild(el("dt", null, "Figure"));
+      var dd = el("dd"); dd.appendChild(el("span", "fig", c.figure)); dl.appendChild(dd);
+    }
+    row(dl, "Page", c.page);
+    row(dl, "Paper's method", c.method);
+    row(dl, "Data here", c.data);
+    row(dl, "Testable?", c.testable);
+    row(dl, "Measured", c.measured, "measured");
+    row(dl, "Watch out", c.watch_out, "watch");
+    row(dl, "Our result", c.our_result, "measured");
+    row(dl, "Caveats", c.caveats);
+    if (c.files && c.files.length) row(dl, "Files", c.files.join("  ·  "));
+    card.appendChild(dl);
+    addFigures(card, c.figures);
+    main.appendChild(card);
+  });
+
+  // ---- samples
+  var samples = P.samples || [];
+  section("Samples", "(" + samples.length + " datasets)",
+    "Read from each file's obs table with scripts/06_profile_h5ads.py and " +
+    "scripts/07_sample_level_counts.py — not from the paper. " +
+    "'Also differs' is what varies between the groups besides the comparison itself.");
+  samples.forEach(function (s) {
+    var card = el("div", "card");
+    var head = el("div", "chead");
+    head.appendChild(el("span", "cid", "data"));
+    head.appendChild(el("span", "claim", s.dataset));
+    if (s.size) head.appendChild(el("span", "status s-untested", s.size));
+    card.appendChild(head);
+    var dl = el("dl");
+    row(dl, "What", s.what);
+    row(dl, "Replicates", s.replicates);
+    row(dl, "Groups", s.groups, "measured");
+    row(dl, "Also differs", s.also_differs, "watch");
+    card.appendChild(dl);
+    if (s.note) card.appendChild(el("p", "note", "⚠ " + s.note));
+    main.appendChild(card);
+  });
+
+  // ---- questions
+  var qs = P.questions || [];
+  section("Questions asked", "(" + qs.length + ")",
+    "Each question with what we found and, just as important, what the result cannot support.");
+  if (!qs.length) {
+    main.appendChild(el("div", "card", "No questions logged yet."));
+  }
+  qs.forEach(function (q, i) {
+    var card = el("div", "card");
+    var head = el("div", "chead");
+    head.appendChild(el("span", "cid", "Q" + (i + 1)));
+    head.appendChild(el("span", "claim", q.asked));
+    card.appendChild(head);
+    var dl = el("dl");
+    row(dl, "Found", q.found, "measured");
+    row(dl, "Cannot support", q.cannot_support, "watch");
+    if (q.files && q.files.length) row(dl, "Files", q.files.join("  ·  "));
+    card.appendChild(dl);
+    addFigures(card, q.figures);
+    main.appendChild(card);
+  });
+
+  // ---- supplement map
+  var sup = P.supplement_map || [];
+  if (sup.length) {
+    section("What is in each supplementary file", "(" + sup.length + ")",
+      "papers/GLIS3_Nature2025/supplement/ — the spreadsheets hold the per-animal numbers " +
+      "behind most bar charts, so a claim that looks like an image is often checkable.");
+    var card = el("div", "card");
+    var t = el("table");
+    var thead = el("thead"), tr = el("tr");
+    tr.appendChild(el("th", null, "File")); tr.appendChild(el("th", null, "Contents"));
+    thead.appendChild(tr); t.appendChild(thead);
+    var tb = el("tbody");
+    sup.forEach(function (r) {
+      var row2 = el("tr");
+      var td1 = el("td"); td1.appendChild(el("span", "mono", r[0])); row2.appendChild(td1);
+      row2.appendChild(el("td", null, r[1]));
+      tb.appendChild(row2);
+    });
+    t.appendChild(tb); card.appendChild(t); main.appendChild(card);
+  }
+
+  $("footer").textContent =
+    "Built by the interactive-paper skill. Edit paper_data.js, not this page — paper.html " +
+    "renders whatever is in the data file. Status values: not tested · reproduces · partly · " +
+    "does not · cannot test with this data. Never move a claim out of 'not tested' without a " +
+    "file in results/ to point at.";
+})();
+</script>
+</body>
+</html>
